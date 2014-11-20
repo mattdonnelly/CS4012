@@ -1,5 +1,7 @@
+# OS X
 .DS_Store
 
+# Haskell
 dist
 cabal-dev
 *.o
@@ -15,4 +17,7 @@ cabal.config
 *.prof
 *.hp
 *.aux
+
+# Threadscope
+*.eventlog
 
