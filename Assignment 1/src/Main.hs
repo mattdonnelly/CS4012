@@ -2,12 +2,15 @@ module Main where
 
 import qualified Part01
 import qualified Part02
+import qualified Part04
 
 import System.Environment (getArgs)
 
 main :: IO ()
 main = do
     args <- getArgs
-    contents <- readFile $ head args
-    let frequencies2 = Part02.wordFrequency $ lines contents
-    print frequencies2
+    state <- readFile (head args)
+    let frequencies = Part04.wordFrequency $ lines state
+    print frequencies
+
+
