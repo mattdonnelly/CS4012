@@ -14,7 +14,7 @@ mapper = words . strip
     where strip = map (\s -> if isAlpha s then toLower s else ' ')
 
 reducer :: [[String]] -> FrequencyTable
-reducer = sort . map (length &&& head) . group . sort . concat
+reducer = map (length &&& head) . group . sort . concat
 
 wordFrequency :: [String] -> FrequencyTable
 wordFrequency = mapReduce mapper reducer
