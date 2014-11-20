@@ -13,7 +13,7 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 executable Assignment1
-  ghc-options:         -Wall
+  ghc-options:         -Wall -threaded -eventlog -rtsopts
   main-is:             Main.hs
   build-depends:       base >=4.7 && <4.8,
                        parallel
