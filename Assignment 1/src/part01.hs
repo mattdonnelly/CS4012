@@ -1,5 +1,6 @@
 module Part01 (wordFrequency) where
 
+import Control.Arrow (&&&)
 import Data.Char (isAlpha, toLower)
 import Data.List (sort, group)
 
@@ -10,7 +11,7 @@ mapper :: Char -> Char
 mapper c = if isAlpha c then toLower c else ' '
 
 reducer :: String -> [(Int, String)]
-reducer =  sort . map (\s -> (length s, head s)) . group . sort . words
+reducer =  sort . map (length &&& head) . group . sort . words
 
 wordFrequency :: String -> [(Int, String)]
 wordFrequency = mapReduce mapper reducer
