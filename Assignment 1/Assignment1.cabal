@@ -16,6 +16,7 @@ executable Assignment1
   ghc-options:         -Wall -threaded -eventlog -rtsopts
   main-is:             Main.hs
   build-depends:       base >=4.7 && <4.8,
-                       parallel
+                       parallel,
+                       containers
   hs-source-dirs:      src
   default-language:    Haskell2010
