@@ -1,4 +1,4 @@
-CS4032 Solutions
+CS4012 Solutions
 ================
 
 This repo contains my solutions to labs for Trinity College Dublin's CS4012: Topics in Functional Programming
