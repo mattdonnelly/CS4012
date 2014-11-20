@@ -1,6 +1,6 @@
 module Part01 (wordFrequency) where
 
-import Control.Arrow (&&&)
+import Control.Arrow ((&&&))
 import Data.Char (isAlpha, toLower)
 import Data.List (sort, group)
 

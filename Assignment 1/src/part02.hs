@@ -1,6 +1,6 @@
 module Part02 (wordFrequency) where
 
-import Control.Arrow (&&&)
+import Control.Arrow ((&&&))
 import Control.Parallel (pseq)
 import Control.Parallel.Strategies (Strategy, parMap, using, dot, rpar, rdeepseq, rseq)
 import Data.Char (isAlpha, toLower)
