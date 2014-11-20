@@ -6,17 +6,20 @@ import Control.Parallel.Strategies (Strategy, parMap, using, dot, rpar, rdeepseq
 import Data.Char (isAlpha, toLower)
 import Data.List (sort, group)
 
+type FrequencyTable = [(Int, String)]
+
 mapReduce :: Strategy b -> (a -> b) -> Strategy c -> ([b] -> c) -> [a] -> c
 mapReduce mapStrat mapFunc reduceStrat reduceFunc input = mapResult `pseq` reduceResult
      where
         mapResult = parMap mapStrat mapFunc input
         reduceResult = reduceFunc mapResult `using` reduceStrat
 
-mapper :: Char -> Char
-mapper c = if isAlpha c then toLower c else ' '
+mapper :: String -> [String]
+mapper = words . strip
+    where strip = map (\s -> if isAlpha s then toLower s else ' ')
 
-reducer :: String -> [(Int, String)]
-reducer =  sort . map (length &&& head) . group . sort . words
+reducer :: [[String]] -> FrequencyTable
+reducer = sort . map (length &&& head) . group . sort . concat
 
-wordFrequency :: String -> [(Int, String)]
+wordFrequency :: [String] -> FrequencyTable
 wordFrequency = mapReduce (rpar `dot` rdeepseq) mapper rseq reducer

@@ -4,14 +4,17 @@ import Control.Arrow ((&&&))
 import Data.Char (isAlpha, toLower)
 import Data.List (sort, group)
 
+type FrequencyTable = [(Int, String)]
+
 mapReduce :: (a -> b) -> ([b] -> c) -> [a] -> c
 mapReduce mapFunction reduceFunction = reduceFunction . (map mapFunction)
 
-mapper :: Char -> Char
-mapper c = if isAlpha c then toLower c else ' '
+mapper :: String -> [String]
+mapper = words . strip
+    where strip = map (\s -> if isAlpha s then toLower s else ' ')
 
-reducer :: String -> [(Int, String)]
-reducer =  sort . map (length &&& head) . group . sort . words
+reducer :: [[String]] -> FrequencyTable
+reducer = sort . map (length &&& head) . group . sort . concat
 
-wordFrequency :: String -> [(Int, String)]
+wordFrequency :: [String] -> FrequencyTable
 wordFrequency = mapReduce mapper reducer
