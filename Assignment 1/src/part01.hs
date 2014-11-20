@@ -3,6 +3,7 @@ module Part01 (wordFrequency) where
 import Control.Arrow ((&&&))
 import Data.Char (isAlpha, toLower)
 import Data.List (sort, group)
+import Data.Map as Map (Map, insertWith, empty, toList)
 
 type FrequencyTable = [(Int, String)]
 
