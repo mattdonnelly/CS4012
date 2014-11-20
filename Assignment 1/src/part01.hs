@@ -5,7 +5,7 @@ import Data.Char (isAlpha, toLower)
 import Data.List (sort, group)
 import Data.Map as Map (Map, insertWith, empty, toList)
 
-type FrequencyTable = [(Int, String)]
+type FrequencyTable = [(String, Int)]
 
 mapReduce :: (a -> b) -> ([b] -> c) -> [a] -> c
 mapReduce mapFunction reduceFunction = reduceFunction . (map mapFunction)
