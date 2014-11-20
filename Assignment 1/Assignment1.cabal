@@ -4,7 +4,7 @@
 name:                Assignment1
 version:             0.1.0.0
 synopsis:            CS4012 Assignment 1
-description:         Implementing parallel MapReduce
+description:         Concurrent local Map-Reduce
 author:              Matt Donnelly
 maintainer:          mattdonnelly@me.com
 copyright:           2014, Matt Donnelly
