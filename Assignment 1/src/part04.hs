@@ -23,7 +23,7 @@ retMR k = MR (\ss -> [(s, k) | s <- fst <$> ss])
 bindMR :: (Eq b, NFData s'', NFData c) => MapReduce s a s' b -> (b -> MapReduce s' b s'' c) -> MapReduce s a s'' c
 bindMR f g = MR (\s ->
     let
-        fs = runMR f s
+        fs = (runMR f) s
         gs = map g $ nub $ snd <$> fs
     in
         concat $ map (\g' -> runMR g' fs) gs)
