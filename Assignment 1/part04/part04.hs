@@ -1,11 +1,10 @@
-module Part04 (wordFrequency) where
-
 import Control.Applicative ((<$>))
 import Control.DeepSeq (NFData)
 import Data.Char (isAlpha, toLower)
 import Data.Hashable (Hashable, hash)
 import Data.List (nub)
 import Prelude hiding (return, (>>=))
+import System.Environment (getArgs)
 
 class Monad' m where
     return :: a -> m s x s a
@@ -52,3 +51,11 @@ reducer xs = [(head xs,length xs)]
 wordFrequency :: [String] -> [(String , Int)]
 wordFrequency state = runMapReduce mr state
     where mr = distributeMR >>= wrapMR mapper >>= wrapMR reducer
+
+main :: IO ()
+main = do
+    args <- getArgs
+    state <- readFile (head args)
+    let frequencies = wordFrequency $ lines state
+    print frequencies
+
