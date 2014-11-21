@@ -10,7 +10,7 @@ main :: IO ()
 main = do
     args <- getArgs
     state <- readFile (head args)
-    let frequencies = Part04.wordFrequency $ lines state
+    let frequencies = Part02.wordFrequency $ lines state
     print frequencies
 
 

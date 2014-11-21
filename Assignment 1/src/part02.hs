@@ -5,7 +5,7 @@ import Control.Parallel (pseq)
 import Control.Parallel.Strategies (Strategy, parMap, using, dot, rpar, rdeepseq, rseq)
 import Data.Char (isAlpha, toLower)
 import Data.List (sort, group)
-import Data.Map as Map (Map, insertWith, empty, toList)
+import Data.Map (singleton, empty, toList, unionWith)
 
 type FrequencyTable = [(String, Int)]
 
@@ -20,10 +20,8 @@ mapper = map (head &&& length) . group . sort . words . strip
     where strip = map (\c -> if isAlpha c then toLower c else ' ')
 
 reducer :: [FrequencyTable] -> FrequencyTable
-reducer = toList . foldl insertOrAdd accum . concat
-    where
-        accum = empty :: Map String Int
-        insertOrAdd m (k, v) = insertWith (+) k v m
+reducer = toList . foldl (unionWith (+)) empty . map convertPairToMap . concat
+    where convertPairToMap = uncurry singleton
 
 wordFrequency :: [String] -> FrequencyTable
 wordFrequency = mapReduce (rpar `dot` rdeepseq) mapper rseq reducer
