@@ -1,5 +1,4 @@
 import Control.Applicative ((<$>))
-import Control.Parallel.Strategies (parMap, rdeepseq)
 import Control.DeepSeq (NFData)
 import Data.Char (isAlpha, toLower)
 import Data.Hashable (Hashable, hash)
@@ -23,8 +22,23 @@ instance Monad' MapReduce where
 retMR :: a -> MapReduce s x s a
 retMR k = MR (\ss -> [(s, k) | s <- fst <$> ss])
 
-pmap:: (NFData b) => (a -> b) -> [a] -> [b]
-pmap = parMap rdeepseq
+concurrentMap :: (a -> b) -> [a] -> [b]
+concurrentMap _ [] = []
+concurrentMap f xs = unsafePerformIO $ do
+    inChan <- newChan
+    outChan <- newChan
+    forM_ [1..nrWorkers] (\_ -> forkIO $ worker f inChan outChan)
+    forM_ xs (writeChan inChan)
+    replicateM (length xs) (do
+        x <- readChan outChan
+        Prelude.return x)
+
+worker :: (a -> b) -> Chan a -> Chan b -> IO ()
+worker f inChan outChan =
+    forever $ do
+        x <- readChan inChan
+        let mapped = f x
+        writeChan outChan mapped
 
 bindMR :: (Eq b, NFData s'', NFData c) => MapReduce s a s' b -> (b -> MapReduce s' b s'' c) -> MapReduce s a s'' c
 bindMR f g = MR (\s ->
@@ -32,7 +46,7 @@ bindMR f g = MR (\s ->
         fs = (runMR f) s
         gs = map g $ nub $ snd <$> fs
     in
-        concat $ pmap (\g' -> runMR g' fs) gs)
+        concat $ concurrentMap (\g' -> runMR g' fs) gs)
 
 runMapReduce :: MapReduce s () s' b -> [s] -> [(s',b)]
 runMapReduce m ss = (runMR m) [(s, ()) | s <- ss]
@@ -48,24 +62,7 @@ nrWorkers :: Int
 nrWorkers = 8
 
 mapper :: [String] -> [(String , String)]
-mapper [] = []
-mapper xs = unsafePerformIO $ do
-    inChan <- newChan
-    outChan <- newChan
-    forM_ [1..nrWorkers] (\_ -> forkIO $ worker inChan outChan)
-    forM_ xs (writeChan inChan)
-    x <- replicateM (length xs) (do
-            parsed <- readChan outChan
-            Prelude.return parsed
-        )
-    Prelude.return $ concat x
-
-worker :: Chan String -> Chan [(String, String)] -> IO ()
-worker inChan outChan =
-    forever $ do
-        x <- readChan inChan
-        let parsed = parse x
-        writeChan outChan parsed
+mapper xs = concat $ concurrentMap parse xs
     where
         parse = (map (\w -> (w,w))) . words . strip
         strip = map (\c -> if isAlpha c then toLower c else ' ')
