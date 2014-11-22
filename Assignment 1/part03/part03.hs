@@ -1,9 +1,9 @@
 import Control.Arrow ((&&&))
-import Control.Parallel (pseq)
+import Control.Parallel (pseq, par)
 import Control.Parallel.Strategies (Strategy, parMap, using, dot, rpar, rdeepseq, rseq)
 import Data.Char (isAlpha, toLower)
 import Data.List (sort, group)
-import Data.Map as Map (Map, insertWith, empty, toList)
+import Data.Map (singleton, toList, unionWith, empty)
 import System.Environment (getArgs)
 
 type FrequencyTable = [(String, Int)]
@@ -18,15 +18,21 @@ mapper :: String -> FrequencyTable
 mapper = map (head &&& length) . group . sort . words . strip
     where strip = map (\c -> if isAlpha c then toLower c else ' ')
 
-mapper :: String -> FrequencyTable
-mapper = map (head &&& length) . group . sort . words . strip
-    where strip = map (\c -> if isAlpha c then toLower c else ' ')
-
 reducer :: [FrequencyTable] -> FrequencyTable
-reducer = toList . foldl insertOrAdd accum . concat
-    where
-        accum = empty :: Map String Int
-        insertOrAdd m (k, v) = insertWith (+) k v m
+reducer = toList . fold (unionWith (+)) empty . map convertPairToMap . concat
+    where convertPairToMap = uncurry singleton
+
+-- reducer :: [FrequencyTable] -> FrequencyTable
+-- reducer = toList . pfold (unionWith (+)) . map convertPairToMap . concat
+--     where convertPairToMap = uncurry singleton
+--
+-- pfold :: (a -> a -> a) -> [a] -> a
+-- pfold _ [x] = x
+-- pfold mappend xs  = (ys `par` zs) `pseq` (ys `mappend` zs) where
+--     len = length xs
+--     (ys', zs') = splitAt (len `div` 2) xs
+--     ys = pfold mappend ys'
+--     zs = pfold mappend zs'
 
 wordFrequency :: [String] -> FrequencyTable
 wordFrequency = mapReduce (rpar `dot` rdeepseq) mapper rseq reducer
