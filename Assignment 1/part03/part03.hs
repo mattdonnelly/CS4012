@@ -22,17 +22,20 @@ reducer :: [FrequencyTable] -> FrequencyTable
 reducer = toList . fold (unionWith (+)) empty . map convertPairToMap . concat
     where convertPairToMap = uncurry singleton
 
--- reducer :: [FrequencyTable] -> FrequencyTable
--- reducer = toList . pfold (unionWith (+)) . map convertPairToMap . concat
---     where convertPairToMap = uncurry singleton
---
--- pfold :: (a -> a -> a) -> [a] -> a
--- pfold _ [x] = x
--- pfold mappend xs  = (ys `par` zs) `pseq` (ys `mappend` zs) where
---     len = length xs
---     (ys', zs') = splitAt (len `div` 2) xs
---     ys = pfold mappend ys'
---     zs = pfold mappend zs'
+{-- Parallel version of reducer which turned out to be slower
+
+    reducer :: [FrequencyTable] -> FrequencyTable
+    reducer = toList . pfold (unionWith (+)) . map convertPairToMap . concat
+        where convertPairToMap = uncurry singleton
+
+    pfold :: (a -> a -> a) -> [a] -> a
+    pfold _ [x] = x
+    pfold mappend xs  = (ys `par` zs) `pseq` (ys `mappend` zs) where
+        len = length xs
+        (ys', zs') = splitAt (len `div` 2) xs
+        ys = pfold mappend ys'
+        zs = pfold mappend zs'
+--}
 
 wordFrequency :: [String] -> FrequencyTable
 wordFrequency = mapReduce (rpar `dot` rdeepseq) mapper rseq reducer
