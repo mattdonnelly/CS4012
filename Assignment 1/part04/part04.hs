@@ -29,9 +29,7 @@ concurrentMap f xs = unsafePerformIO $ do
     outChan <- newChan
     forM_ [1..nrWorkers] (\_ -> forkIO $ worker f inChan outChan)
     forM_ xs (writeChan inChan)
-    replicateM (length xs) (do
-        x <- readChan outChan
-        Prelude.return x)
+    replicateM (length xs) (readChan outChan)
 
 worker :: (a -> b) -> Chan a -> Chan b -> IO ()
 worker f inChan outChan =
